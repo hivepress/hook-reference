@@ -8,6 +8,8 @@
 	    <script src="scripts/prettify/prettify.js"> </script>
 	    <script src="scripts/prettify/lang-css.js"> </script>
 
+		<link rel="shortcut icon" href="favicon.png" />
+
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -15,6 +17,7 @@
 	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
 	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
 
+		<link type="text/css" rel="stylesheet" href="minireset.min.css">
 		<link type="text/css" rel="stylesheet" href="style.css">
 	</head>
 	<body<?js if (title === 'Home') { ?> class="home"<?js } ?>>
@@ -30,13 +33,13 @@
 		</header>
 		<div class="site-content">
 			<div class="container">
-				<main id="main">
+				<main id="main" class="site-main">
 					<?js if (title !== 'Home') { ?>
 					<h1 class="page-title"><?js= title ?></h1>
 					<?js } ?>
 					<?js= content ?>
 				</main>
-				<nav>
+				<nav class="site-sidebar">
 					<?js= this.nav ?>
 				</nav>
 				<br class="clear">

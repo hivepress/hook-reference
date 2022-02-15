@@ -11,6 +11,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
 }
 /*--------------------------------------------------------------
 Header
@@ -31,10 +32,14 @@ Header
 
 .header-menu ul {
     list-style: none;
-    margin: none;
-    padding: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     align-items: center;
+}
+
+.header-menu li {
+    margin:0;
 }
 
 .header-menu li:not(:last-child) {
@@ -44,10 +49,34 @@ Header
 .header-menu a {
     transition: color .25s;
     font-weight: 500;
-    color: rgba(15,23,39,.65);
+    color: rgba(15,23,39,.85);
     text-decoration: none;
 }
 
 .header-menu a:hover {
     color: #ffc107;
+}
+/*--------------------------------------------------------------
+Content
+--------------------------------------------------------------*/
+.site-content {
+    box-sizing: border-box;
+    margin: 0 auto;
+    max-width: 1400px;
+    padding: 0 2rem;
+    position: relative;
+    width: 100%;
+}
+
+@media (min-width: 1200px) {
+    .site-content {
+        padding: 0;
+        width: 95%;
+    }
+}
+
+@media (min-width: 1000px) {
+    .site-content {
+        width: 85%;
+    }
 }
