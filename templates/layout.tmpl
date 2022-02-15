@@ -8,6 +8,10 @@
 	    <script src="scripts/prettify/prettify.js"> </script>
 	    <script src="scripts/prettify/lang-css.js"> </script>
 
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
 	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
 	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
 
@@ -17,16 +21,41 @@
 		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/style.css">
 	</head>
 	<body<?js if (title === 'Home') { ?> class="home"<?js } ?>>
-		<div id="main">
-			<?js if (title !== 'Home') { ?>
-		    <h1 class="page-title"><?js= title ?></h1>
-			<?js } ?>
-		    <?js= content ?>
+		<div class="site-container">
+			<header class="site-header">
+				<div class="header-navbar">
+					<div class="header-navbar__start">
+						<div class="header-logo">
+							todo
+						</div>
+					</div>
+					<div class="header-navbar__end">
+						<nav class="header-navbar__menu" data-component="menu">
+							<ul>
+								<li><a href="#">Todo</a></li>
+							</ul>
+						</nav>
+					</div>
+				</div>
+			</header>
+			<div class="site-content" id="content">
+				<div class="container">
+					<div class="row">
+						<main id="main" class="col-sm-8 col-xs-12">
+							<?js if (title !== 'Home') { ?>
+						    <h1 class="page-title"><?js= title ?></h1>
+							<?js } ?>
+						    <?js= content ?>
+						</main>
+						<aside class="site-sidebar col-sm-4 col-xs-12">
+							<nav>
+							    <?js= this.nav ?>
+							</nav>
+						</aside>
+					</div>
+				</div>
+			</div>
 		</div>
-		<nav>
-		    <?js= this.nav ?>
-		</nav>
-		<br class="clear">
 
 		<script> prettyPrint(); </script>
 		<script src="scripts/linenumber.js"> </script>
