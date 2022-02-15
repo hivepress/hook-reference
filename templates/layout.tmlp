@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+	    <title><?js= title ?> | HivePress Hook Reference</title>
+
+	    <script src="scripts/prettify/prettify.js"> </script>
+	    <script src="scripts/prettify/lang-css.js"> </script>
+
+	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/minireset.min.css">
+		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/flexboxgrid.min.css">
+		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/frontend.min.css">
+		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/style.css">
+	</head>
+	<body<?js if (title === 'Home') { ?> class="home"<?js } ?>>
+		<div id="main">
+			<?js if (title !== 'Home') { ?>
+		    <h1 class="page-title"><?js= title ?></h1>
+			<?js } ?>
+		    <?js= content ?>
+		</div>
+		<nav>
+		    <?js= this.nav ?>
+		</nav>
+		<br class="clear">
+
+		<script> prettyPrint(); </script>
+		<script src="scripts/linenumber.js"> </script>
+	</body>
+</html>
