@@ -1,10 +1,53 @@
 /*--------------------------------------------------------------
 Typography
 --------------------------------------------------------------*/
+html {
+    font-size: 16px;
+}
+
 body {
     font-family: 'DM Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', sans-serif;
+}
+/*--------------------------------------------------------------
+Header
+--------------------------------------------------------------*/
+.site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid rgba(7,36,86,.075);
+}
+
+.header-logo img {
+    display: block;
+    height: auto;
+    max-width: 186px;
+}
+
+.header-menu ul {
+    list-style: none;
+    margin: none;
+    padding: none;
+    display: flex;
+    align-items: center;
+}
+
+.header-menu li:not(:last-child) {
+    margin-right: 2rem;
+}
+
+.header-menu a {
+    transition: color .25s;
+    font-weight: 500;
+    color: rgba(15,23,39,.65);
+    text-decoration: none;
+}
+
+.header-menu a:hover {
+    color: #ffc107;
 }
