@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build:docs": "rm -rf hookdocs/ && jsdoc -c conf.json"
+  },
+  "devDependencies": {
+    "jsdoc": "~3.6.3",
+    "wp-hookdoc": "^0.2.0"
+  }
+}
