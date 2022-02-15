@@ -15,7 +15,12 @@
 	],
 	"templates": {
 		"default": {
-			"layoutFile": "./templates/layout.tmpl"
+			"layoutFile": "./templates/layout.tmpl",
+			"staticFiles": {
+				"include": [
+					"./templates/static"
+				]
+			}
 		}
 	}
 }

@@ -15,45 +15,31 @@
 	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
 	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
 
-		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/minireset.min.css">
-		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/flexboxgrid.min.css">
-		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/vendor/hivepress/hivetheme/assets/css/frontend.min.css">
-		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/style.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
 	</head>
 	<body<?js if (title === 'Home') { ?> class="home"<?js } ?>>
-		<div class="site-container">
-			<header class="site-header">
-				<div class="header-navbar">
-					<div class="header-navbar__start">
-						<div class="header-logo">
-							todo
-						</div>
-					</div>
-					<div class="header-navbar__end">
-						<nav class="header-navbar__menu" data-component="menu">
-							<ul>
-								<li><a href="#">Todo</a></li>
-							</ul>
-						</nav>
-					</div>
-				</div>
-			</header>
-			<div class="site-content" id="content">
-				<div class="container">
-					<div class="row">
-						<main id="main" class="col-sm-8 col-xs-12">
-							<?js if (title !== 'Home') { ?>
-						    <h1 class="page-title"><?js= title ?></h1>
-							<?js } ?>
-						    <?js= content ?>
-						</main>
-						<aside class="site-sidebar col-sm-4 col-xs-12">
-							<nav>
-							    <?js= this.nav ?>
-							</nav>
-						</aside>
-					</div>
-				</div>
+		<header class="site-header">
+			<div class="header-logo">
+				<a href="https://hivepress.io/"><img width="186" src="logo.svg" alt="HivePress" /></a>
+			</div>
+			<div class="header-menu">
+				<ul>
+					<li><a href="#">Todo</a></li>
+				</ul>
+			</div>
+		</header>
+		<div class="site-content">
+			<div class="container">
+				<main id="main">
+					<?js if (title !== 'Home') { ?>
+					<h1 class="page-title"><?js= title ?></h1>
+					<?js } ?>
+					<?js= content ?>
+				</main>
+				<nav>
+					<?js= this.nav ?>
+				</nav>
+				<br class="clear">
 			</div>
 		</div>
 
