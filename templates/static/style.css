@@ -2,87 +2,268 @@
 Typography
 --------------------------------------------------------------*/
 html {
-    font-size: 16px;
+	font-size: 16px;
 }
 
 body {
-    font-family: 'DM Sans', sans-serif;
+	font-family: 'DM Sans', sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 700;
+	font-family: 'DM Sans', sans-serif;
+	font-weight: 700;
+	letter-spacing: 0;
 }
+
+h1 {
+	font-size: 34px;
+	line-height: 1.25;
+	margin-bottom: 1.75rem;
+	word-break: break-all;
+}
+
+h3 {
+	font-size: 27px;
+}
+
+h4 {
+	font-size: 24px;
+}
+
+h5 {
+	font-size: 22px;
+}
+
+p {
+	line-height: 1.675;
+}
+
+a, a:visited, a:active {
+	color: #13b966;
+}
+
+a:hover {
+	text-decoration: none;
+	color: #11a259;
+}
+
+p code {
+	background-color: #f4f4f4;
+	display: inline-block;
+	padding: 0 6px;
+}
+
+dl {
+	margin-top: 14px;
+	border-left: 2px solid #DDD;
+}
+
+dl:last-child {
+	margin-bottom: 0;
+}
+
+dl dt {
+	padding-left: 1rem !important;
+	width: 120px;
+	float: left;
+	padding-top: 6px;
+}
+
+dl dd {
+	margin-left: 100px;
+	padding-top: 6px;
+}
+
+dl dd li {
+	padding-top: 0 !important;
+	margin-left: 0 !important;
+}
+
+/*--------------------------------------------------------------
+Tables
+--------------------------------------------------------------*/
+th, td {
+	padding: .5rem 1rem;
+}
+
+th {
+	background-color: #f4f4f4;
+	border-right: none;
+	font-weight: 500;
+}
+
 /*--------------------------------------------------------------
 Header
 --------------------------------------------------------------*/
 .site-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid rgba(7,36,86,.075);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 1rem 2rem;
+	border-bottom: 1px solid rgba(7, 36, 86, .075);
+}
+
+@media (max-width: 767px) {
+	.site-header {
+		justify-content: center;
+	}
 }
 
 .header-logo img {
-    display: block;
-    height: auto;
-    max-width: 186px;
+	display: block;
+	height: auto;
+	max-width: 186px;
+}
+
+@media (max-width: 767px) {
+	.header-menu {
+		display: none;
+	}
 }
 
 .header-menu ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	align-items: center;
 }
 
 .header-menu li {
-    margin:0;
+	margin: 0;
 }
 
 .header-menu li:not(:last-child) {
-    margin-right: 2rem;
+	margin-right: 2rem;
 }
 
 .header-menu a {
-    transition: color .25s;
-    font-weight: 500;
-    color: rgba(15,23,39,.85);
-    text-decoration: none;
+	transition: color .25s;
+	font-weight: 500;
+	color: rgba(15, 23, 39, .85);
+	text-decoration: none;
 }
 
 .header-menu a:hover {
-    color: #ffc107;
+	color: #ffc107;
 }
+
 /*--------------------------------------------------------------
 Content
 --------------------------------------------------------------*/
 .site-content {
-    box-sizing: border-box;
-    margin: 0 auto;
-    max-width: 1400px;
-    padding: 0 2rem;
-    position: relative;
-    width: 100%;
+	box-sizing: border-box;
+	margin: 0 auto;
+	max-width: 1400px;
+	padding: 4rem 2rem;
+	position: relative;
+	width: 100%;
 }
 
-@media (min-width: 1200px) {
-    .site-content {
-        padding: 0;
-        width: 95%;
-    }
+@media (min-width: 1024px) {
+	.site-content {
+		width: 85%;
+		padding-left: 0;
+		padding-right: 0;
+	}
 }
 
-@media (min-width: 1000px) {
-    .site-content {
-        width: 85%;
-    }
+@media (max-width: 1024px) {
+	.site-content {
+		padding-top: 2rem;
+		padding-bottom: 2rem;
+	}
 }
+
+@media (max-width: 767px) {
+	#main {
+		float: none;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+	}
+}
+
+section {
+	margin-right: 3.5rem;
+	padding: 0;
+	border-bottom: none;
+}
+
+.home section:first-child {
+	display: none;
+}
+
+@media (max-width: 767px) {
+	section {
+		margin-right: 0;
+	}
+}
+
+h4 {
+	font-size: 18px;
+	border-left-color: #15cd72;
+	padding: .5rem 1rem;
+}
+
+h5 {
+	margin-bottom: 1rem;
+}
+
+.description {
+	margin-top: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.details {
+	margin-bottom: 1.5rem;
+}
+
+.name {
+	word-break: break-all;
+}
+
+.name, .signature {
+	font-size: 18px;
+	font-family: Consolas, Monaco, 'Andale Mono', monospace;
+	font-weight: normal;
+}
+
 /*--------------------------------------------------------------
 Sidebar
 --------------------------------------------------------------*/
 .site-sidebar h2 {
-    display: none;
+	display: none;
+}
+
+nav {
+	margin: 0;
+	padding-left: 2rem;
+	border-left-color: #16d073;
+}
+
+@media (max-width: 767px) {
+	nav {
+		float: none;
+		margin-top: 2rem;
+		width: 100%;
+		border-left: none;
+		border-top: 1px solid #16d073;
+		padding-left: 0;
+		padding-top: 1.5rem;
+	}
+}
+
+nav h3 {
+	margin: 0;
+}
+
+nav ul:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
+nav li {
+	margin-top: 8px;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }

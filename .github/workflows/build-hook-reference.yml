@@ -34,4 +34,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         target_branch: gh-pages
-        build_dir: hookdocs
+        build_dir: docs

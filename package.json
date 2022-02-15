@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build:docs": "rm -rf hookdocs/ && jsdoc -c conf.json"
+    "build:docs": "rm -rf docs/ && jsdoc -c conf.json"
   },
   "devDependencies": {
     "jsdoc": "~3.6.3",

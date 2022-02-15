@@ -3,6 +3,7 @@
 	<head>
 	    <meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+
 	    <title><?js= title ?> | HivePress Hook Reference</title>
 
 	    <script src="scripts/prettify/prettify.js"> </script>
@@ -18,7 +19,7 @@
 	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
 
 		<link type="text/css" rel="stylesheet" href="minireset.min.css">
-		<link type="text/css" rel="stylesheet" href="https://hivepress.io/wp-content/themes/hivesite/assets/css/hooks.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
 	</head>
 	<body<?js if (title === 'Home') { ?> class="home"<?js } ?>>
 		<header class="site-header">
@@ -34,21 +35,19 @@
 			</div>
 		</header>
 		<div class="site-content">
-			<div class="container">
-				<main id="main" class="site-main">
-					<?js if (title !== 'Home') { ?>
-					<h1 class="page-title"><?js= title ?></h1>
-					<?js } ?>
-					<?js= content ?>
-				</main>
-				<nav class="site-sidebar">
-					<?js= this.nav ?>
-				</nav>
-				<br class="clear">
-			</div>
+			<main id="main" class="site-main">
+				<?js if (title !== 'Home') { ?>
+				<h1 class="page-title"><?js= title ?></h1>
+				<?js } ?>
+				<?js= content ?>
+			</main>
+			<nav class="site-sidebar">
+				<?js= this.nav ?>
+			</nav>
+			<div class="clear"></div>
 		</div>
 
-		<script> prettyPrint(); </script>
-		<script src="scripts/linenumber.js"> </script>
+		<script>prettyPrint();</script>
+		<script src="scripts/linenumber.js"></script>
 	</body>
 </html>
