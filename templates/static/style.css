@@ -38,6 +38,10 @@ p {
 	line-height: 1.675;
 }
 
+p:not(:last-child) {
+	margin-bottom: 1rem;
+}
+
 a, a:visited, a:active {
 	color: #13b966;
 }
