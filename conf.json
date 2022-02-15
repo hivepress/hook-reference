@@ -11,11 +11,11 @@
 	},
 	"plugins": [
 		"node_modules/wp-hookdoc/plugin",
-		"plugins/markdown",
-		"templates": {
-			"default": {
-				"layoutFile": "./templates/layout.tmpl"
-			}
+		"plugins/markdown"
+	],
+	"templates": {
+		"default": {
+			"layoutFile": "./templates/layout.tmpl"
 		}
-	]
+	}
 }
