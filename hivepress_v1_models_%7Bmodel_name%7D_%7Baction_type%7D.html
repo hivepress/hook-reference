@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	    <title>Action: hivepress/v1/models/{model_name}/{action_type} | HivePress Hook Reference</title>
+
+	    <script src="scripts/prettify/prettify.js"> </script>
+	    <script src="scripts/prettify/lang-css.js"> </script>
+
+		<link rel="shortcut icon" href="favicon.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+		<link type="text/css" rel="stylesheet" href="minireset.min.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="header-logo">
+				<a href="https://hivepress.io/"><img src="logo.svg" alt="HivePress" /></a>
+			</div>
+			<div class="header-menu">
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="https://hivepress.github.io/code-reference/">Code Reference</a></li>
+					<li><a href="https://help.hivepress.io/">Knowledge Base</a></li>
+				</ul>
+			</div>
+		</header>
+		<div class="site-content">
+			<main id="main" class="site-main">
+				
+				<h1 class="page-title">Action: hivepress/v1/models/{model_name}/{action_type}</h1>
+				
+				
+
+
+
+
+<section>
+
+<header>
+    <h2></h2>
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="hivepress/v1/models/{model_name}/{action_type}">do_action( 'hivepress/v1/models/{model_name}/{action_type}', <span class="signature">$object_id, $object )</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Fires when the model (e.g. <code>listing</code> or <code>vendor</code>) object is created, updated or deleted. The last part of the hook refers to the action type (<code>create</code>, <code>update</code> or <code>delete</code>). For example, use the <code>hivepress/v1/models/listing/update</code> hook to call a custom function each time a listing is updated.</p>
+</div>
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>$object_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Object ID.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$object</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Model object.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="components_class-hook.php.html">components/class-hook.php</a>, <a href="components_class-hook.php.html#line215">line 215</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+</article>
+
+</section>
+
+
+
+
+			</main>
+			<nav class="site-sidebar">
+				<h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="hivepress_v1_activate.html">hivepress/v1/activate</a></li><li><a href="hivepress_v1_deactivate.html">hivepress/v1/deactivate</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_send.html">hivepress/v1/emails/{email_name}/send</a></li><li><a href="hivepress_v1_models_comment_%257Baction_type%257D.html">hivepress/v1/models/comment/{action_type}</a></li><li><a href="hivepress_v1_models_post_update_terms.html">hivepress/v1/models/post/update_terms</a></li><li><a href="hivepress_v1_models_post_%257Baction_type%257D.html">hivepress/v1/models/post/{action_type}</a></li><li><a href="hivepress_v1_models_term_%257Baction_type%257D.html">hivepress/v1/models/term/{action_type}</a></li><li><a href="hivepress_v1_models_user_login.html">hivepress/v1/models/user/login</a></li><li><a href="hivepress_v1_models_user_register.html">hivepress/v1/models/user/register</a></li><li><a href="hivepress_v1_models_user_update_%257Bfield_name%257D.html">hivepress/v1/models/user/update_{field_name}</a></li><li><a href="hivepress_v1_models_user_%257Baction_type%257D.html">hivepress/v1/models/user/{action_type}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_relate.html">hivepress/v1/models/{model_name}/relate</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_search.html">hivepress/v1/models/{model_name}/search</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_status.html">hivepress/v1/models/{model_name}/update_status</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_%257Bfield_name%257D.html">hivepress/v1/models/{model_name}/update_{field_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_%257Baction_type%257D.html">hivepress/v1/models/{model_name}/{action_type}</a></li><li><a href="hivepress_v1_setup.html">hivepress/v1/setup</a></li><li><a href="hivepress_v1_update.html">hivepress/v1/update</a></li><li><a href="hivepress_v2_models_user_%257Baction_type%257D.html">hivepress/v2/models/user/{action_type}</a></li></ul><h3>Filters</h3><ul><li><a href="hivepress_v1_admin_notices.html">hivepress/v1/admin_notices</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D.html">hivepress/v1/blocks/{block_type}</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D_meta.html">hivepress/v1/blocks/{block_type}/meta</a></li><li><a href="hivepress_v1_components_attribute_models.html">hivepress/v1/components/attribute/models</a></li><li><a href="hivepress_v1_components_editor_preview.html">hivepress/v1/components/editor/preview</a></li><li><a href="hivepress_v1_components_request_context.html">hivepress/v1/components/request/context</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D.html">hivepress/v1/emails/{email_name}</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_meta.html">hivepress/v1/emails/{email_name}/meta</a></li><li><a href="hivepress_v1_extensions.html">hivepress/v1/extensions</a></li><li><a href="hivepress_v1_fields_field_options.html">hivepress/v1/fields/field/options</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D.html">hivepress/v1/fields/{field_type}</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_display_value.html">hivepress/v1/fields/{field_type}/display_value</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_meta.html">hivepress/v1/fields/{field_type}/meta</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D.html">hivepress/v1/forms/{form_name}</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_errors.html">hivepress/v1/forms/{form_name}/errors</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_meta.html">hivepress/v1/forms/{form_name}/meta</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D.html">hivepress/v1/menus/{menu_name}</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_items.html">hivepress/v1/menus/{menu_name}/items</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_meta.html">hivepress/v1/menus/{menu_name}/meta</a></li><li><a href="hivepress_v1_meta_boxes_%257Bmeta_box_name%257D.html">hivepress/v1/meta_boxes/{meta_box_name}</a></li><li><a href="hivepress_v1_models_attachment_filename.html">hivepress/v1/models/attachment/filename</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D.html">hivepress/v1/models/{model_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_attributes.html">hivepress/v1/models/{model_name}/attributes</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_errors.html">hivepress/v1/models/{model_name}/errors</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_fields.html">hivepress/v1/models/{model_name}/fields</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_meta.html">hivepress/v1/models/{model_name}/meta</a></li><li><a href="hivepress_v1_routes.html">hivepress/v1/routes</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D.html">hivepress/v1/templates/{template_name}</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_blocks.html">hivepress/v1/templates/{template_name}/blocks</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_meta.html">hivepress/v1/templates/{template_name}/meta</a></li><li><a href="hivepress_v1_%257Bconfig_name%257D.html">hivepress/v1/{config_name}</a></li></ul>
+			</nav>
+			<div class="clear"></div>
+		</div>
+
+		<script>prettyPrint();</script>
+		<script src="scripts/linenumber.js"></script>
+	</body>
+</html>
