@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	    <title>Source: menus/class-menu.php | HivePress Hook Reference</title>
+
+	    <script src="scripts/prettify/prettify.js"> </script>
+	    <script src="scripts/prettify/lang-css.js"> </script>
+
+		<link rel="shortcut icon" href="favicon.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+		<link type="text/css" rel="stylesheet" href="minireset.min.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="header-logo">
+				<a href="https://hivepress.io/"><img src="logo.svg" alt="HivePress" /></a>
+			</div>
+			<div class="header-menu">
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="https://hivepress.github.io/code-reference/">Code Reference</a></li>
+					<li><a href="https://help.hivepress.io/">Knowledge Base</a></li>
+				</ul>
+			</div>
+		</header>
+		<div class="site-content">
+			<main id="main" class="site-main">
+				
+				<h1 class="page-title">Source: menus/class-menu.php</h1>
+				
+				
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ * Abstract menu.
+ *
+ * @package HivePress\Menus
+ */
+
+namespace HivePress\Menus;
+
+use HivePress\Helpers as hp;
+use HivePress\Traits;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Abstract menu class.
+ */
+abstract class Menu {
+	use Traits\Mutator;
+	use Traits\Meta;
+	use Traits\Context;
+
+	/**
+	 * Menu items.
+	 *
+	 * @var array
+	 */
+	protected $items = [];
+
+	/**
+	 * HTML attributes.
+	 *
+	 * @var array
+	 */
+	protected $attributes = [];
+
+	/**
+	 * Add wrapper?
+	 *
+	 * @var bool
+	 */
+	protected $wrap = true;
+
+	/**
+	 * Class initializer.
+	 *
+	 * @param array $meta Class meta values.
+	 */
+	public static function init( $meta = [] ) {
+		$meta = hp\merge_arrays(
+			[
+				'name'    => hp\get_class_name( static::class ),
+				'chained' => false,
+			],
+			$meta
+		);
+
+		// Filter meta.
+		foreach ( hp\get_class_parents( static::class ) as $class ) {
+
+			/**
+			 * Filters the menu class meta. The class meta stores properties related to the menu type rather than a specific menu instance. The dynamic part of the hook refers to the menu name (e.g. `user_account`). You can check the available menus in the `includes/menus` directory of HivePress.
+			 *
+			 * @hook hivepress/v1/menus/{menu_name}/meta
+			 * @param {array} $meta Class meta values.
+			 * @return {array} Class meta values.
+			 */
+			$meta = apply_filters( 'hivepress/v1/menus/' . hp\get_class_name( $class ) . '/meta', $meta );
+		}
+
+		// Set meta.
+		static::set_meta( $meta );
+	}
+
+	/**
+	 * Class constructor.
+	 *
+	 * @param array $args Menu arguments.
+	 */
+	public function __construct( $args = [] ) {
+
+		// Filter properties.
+		foreach ( hp\get_class_parents( static::class ) as $class ) {
+
+			/**
+			 * Filters the menu properties. The dynamic part of the hook refers to the menu name (e.g. `user_account`). You can check the available menus in the `includes/menus` directory of HivePress.
+			 *
+			 * @hook hivepress/v1/menus/{menu_name}
+			 * @param {array} $props Menu properties.
+			 * @param {object} $menu Menu object.
+			 * @return {array} Menu properties.
+			 */
+			$args = apply_filters( 'hivepress/v1/menus/' . hp\get_class_name( $class ), $args, $this );
+		}
+
+		// Set properties.
+		foreach ( $args as $name => $value ) {
+			$this->set_property( $name, $value );
+		}
+
+		// Bootstrap properties.
+		$this->boot();
+	}
+
+	/**
+	 * Bootstraps menu properties.
+	 */
+	protected function boot() {
+
+		// Get items.
+		$items = $this->items;
+
+		// Filter items.
+		foreach ( hp\get_class_parents( static::class ) as $class ) {
+
+			/**
+			 * Filters menu items. At the time of this hook the menu context is already available. The dynamic part of the hook refers to the menu name (e.g. `user_account`). You can check the available menus in the `includes/menus` directory of HivePress.
+			 *
+			 * @hook hivepress/v1/menus/{menu_name}/items
+			 * @param {array} $items Menu items.
+			 * @param {object} $menu Menu object.
+			 * @return {array} Menu items.
+			 */
+			$items = apply_filters( 'hivepress/v1/menus/' . hp\get_class_name( $class ) . '/items', $items, $this );
+		}
+
+		// Set items.
+		$this->set_items( $items );
+
+		// Set attributes.
+		$this->attributes = hp\merge_arrays(
+			$this->attributes,
+			[
+				'class' => [
+					'hp-menu',
+					'hp-menu--' . hp\sanitize_slug( static::get_meta( 'name' ) ),
+				],
+			]
+		);
+	}
+
+	/**
+	 * Sets menu items.
+	 *
+	 * @param array $items Menu items.
+	 */
+	final protected function set_items( $items ) {
+		$this->items = [];
+
+		foreach ( hp\sort_array( $items ) as $name => $args ) {
+			if ( isset( $args['route'] ) &amp;&amp; ( ! isset( $args['label'] ) || ! isset( $args['url'] ) ) ) {
+
+				// Get route.
+				$route = hivepress()->router->get_route( $args['route'] );
+
+				if ( $route ) {
+
+					// Set label.
+					if ( ! isset( $args['label'] ) ) {
+						$title = hp\get_array_value( $route, 'title' );
+
+						if ( is_callable( $title ) &amp;&amp; ! static::get_meta( 'chained' ) ) {
+							$title = call_user_func( $title );
+						}
+
+						$args['label'] = $title;
+					}
+
+					// Set URL.
+					if ( ! isset( $args['url'] ) ) {
+						if ( static::get_meta( 'chained' ) ) {
+							$args['url'] = hivepress()->router->get_url( $args['route'], hivepress()->request->get_params(), true );
+						} else {
+							$args['url'] = hivepress()->router->get_url( $args['route'] );
+						}
+					}
+				}
+			}
+
+			$this->items[ $name ] = $args;
+		}
+	}
+
+	/**
+	 * Gets menu items.
+	 *
+	 * @return array
+	 */
+	final public function get_items() {
+		return $this->items;
+	}
+
+	/**
+	 * Renders menu HTML.
+	 *
+	 * @return string
+	 */
+	public function render() {
+		$output = '';
+
+		if ( $this->items ) {
+			if ( $this->wrap ) {
+				$output .= '&lt;nav ' . hp\html_attributes( $this->attributes ) . '>';
+			}
+
+			// Render items.
+			$output .= $this->render_items();
+
+			if ( $this->wrap ) {
+				$output .= '&lt;/nav>';
+			}
+		}
+
+		return $output;
+	}
+
+	/**
+	 * Renders menu items.
+	 *
+	 * @param mixed $current Current item name.
+	 * @return string
+	 */
+	protected function render_items( $current = null ) {
+		$output = '';
+
+		// Filter items.
+		$items = array_filter(
+			$this->items,
+			function( $item ) use ( $current ) {
+				$parent = hp\get_array_value( $item, '_parent' );
+
+				return ( is_null( $current ) &amp;&amp; is_null( $parent ) ) || ( ! is_null( $current ) &amp;&amp; $parent === $current );
+			}
+		);
+
+		if ( $items ) {
+
+			// Get current URL.
+			$url = hivepress()->router->get_current_url();
+
+			// Get current route.
+			$route = hivepress()->router->get_current_route_name();
+
+			// Render items.
+			if ( ! $this->wrap &amp;&amp; is_null( $current ) ) {
+				$output .= '&lt;ul ' . hp\html_attributes( $this->attributes ) . '>';
+			} else {
+				$output .= '&lt;ul ' . ( $current ? 'class="sub-menu"' : '' ) . '>';
+			}
+
+			foreach ( hp\sort_array( $items ) as $name => $args ) {
+
+				// Get current class.
+				$class = 'hp-menu__item--' . hp\sanitize_slug( $name );
+
+				if ( $args['url'] === $url || hp\get_array_value( $args, 'route', false ) === $route ) {
+					$class .= ' hp-menu__item--current current-menu-item';
+				}
+
+				// Get child items.
+				$child_items = $this->render_items( $name );
+
+				if ( $child_items ) {
+					$class .= ' menu-item-has-children';
+				}
+
+				// Render menu item.
+				$output .= '&lt;li class="menu-item hp-menu__item ' . esc_attr( $class ) . '">';
+				$output .= '&lt;a href="' . esc_url( $args['url'] ) . '">';
+
+				// Render label.
+				$output .= '&lt;span>' . esc_html( $args['label'] ) . '&lt;/span>';
+
+				// Render meta.
+				if ( isset( $args['meta'] ) ) {
+					$output .= '&lt;small>' . esc_html( $args['meta'] ) . '&lt;/small>';
+				}
+
+				$output .= '&lt;/a>';
+
+				// Render child items.
+				$output .= $child_items;
+
+				$output .= '&lt;/li>';
+			}
+
+			$output .= '&lt;/ul>';
+		}
+
+		return $output;
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+			</main>
+			<nav class="site-sidebar">
+				<h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="hivepress_v1_activate.html">hivepress/v1/activate</a></li><li><a href="hivepress_v1_deactivate.html">hivepress/v1/deactivate</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_send.html">hivepress/v1/emails/{email_name}/send</a></li><li><a href="hivepress_v1_models_comment_%257Baction_type%257D.html">hivepress/v1/models/comment/{action_type}</a></li><li><a href="hivepress_v1_models_post_update_terms.html">hivepress/v1/models/post/update_terms</a></li><li><a href="hivepress_v1_models_post_%257Baction_type%257D.html">hivepress/v1/models/post/{action_type}</a></li><li><a href="hivepress_v1_models_term_%257Baction_type%257D.html">hivepress/v1/models/term/{action_type}</a></li><li><a href="hivepress_v1_models_user_login.html">hivepress/v1/models/user/login</a></li><li><a href="hivepress_v1_models_user_register.html">hivepress/v1/models/user/register</a></li><li><a href="hivepress_v1_models_user_update_%257Bfield_name%257D.html">hivepress/v1/models/user/update_{field_name}</a></li><li><a href="hivepress_v1_models_user_%257Baction_type%257D.html">hivepress/v1/models/user/{action_type}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_relate.html">hivepress/v1/models/{model_name}/relate</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_search.html">hivepress/v1/models/{model_name}/search</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_status.html">hivepress/v1/models/{model_name}/update_status</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_%257Bfield_name%257D.html">hivepress/v1/models/{model_name}/update_{field_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_%257Baction_type%257D.html">hivepress/v1/models/{model_name}/{action_type}</a></li><li><a href="hivepress_v1_setup.html">hivepress/v1/setup</a></li><li><a href="hivepress_v1_update.html">hivepress/v1/update</a></li><li><a href="hivepress_v2_models_user_%257Baction_type%257D.html">hivepress/v2/models/user/{action_type}</a></li></ul><h3>Filters</h3><ul><li><a href="hivepress_v1_admin_notices.html">hivepress/v1/admin_notices</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D.html">hivepress/v1/blocks/{block_type}</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D_meta.html">hivepress/v1/blocks/{block_type}/meta</a></li><li><a href="hivepress_v1_components_attribute_models.html">hivepress/v1/components/attribute/models</a></li><li><a href="hivepress_v1_components_editor_preview.html">hivepress/v1/components/editor/preview</a></li><li><a href="hivepress_v1_components_request_context.html">hivepress/v1/components/request/context</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D.html">hivepress/v1/emails/{email_name}</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_meta.html">hivepress/v1/emails/{email_name}/meta</a></li><li><a href="hivepress_v1_extensions.html">hivepress/v1/extensions</a></li><li><a href="hivepress_v1_fields_field_options.html">hivepress/v1/fields/field/options</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D.html">hivepress/v1/fields/{field_type}</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_display_value.html">hivepress/v1/fields/{field_type}/display_value</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_meta.html">hivepress/v1/fields/{field_type}/meta</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D.html">hivepress/v1/forms/{form_name}</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_errors.html">hivepress/v1/forms/{form_name}/errors</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_meta.html">hivepress/v1/forms/{form_name}/meta</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D.html">hivepress/v1/menus/{menu_name}</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_items.html">hivepress/v1/menus/{menu_name}/items</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_meta.html">hivepress/v1/menus/{menu_name}/meta</a></li><li><a href="hivepress_v1_meta_boxes_%257Bmeta_box_name%257D.html">hivepress/v1/meta_boxes/{meta_box_name}</a></li><li><a href="hivepress_v1_models_attachment_filename.html">hivepress/v1/models/attachment/filename</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D.html">hivepress/v1/models/{model_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_attributes.html">hivepress/v1/models/{model_name}/attributes</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_errors.html">hivepress/v1/models/{model_name}/errors</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_fields.html">hivepress/v1/models/{model_name}/fields</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_meta.html">hivepress/v1/models/{model_name}/meta</a></li><li><a href="hivepress_v1_routes.html">hivepress/v1/routes</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D.html">hivepress/v1/templates/{template_name}</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_blocks.html">hivepress/v1/templates/{template_name}/blocks</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_meta.html">hivepress/v1/templates/{template_name}/meta</a></li><li><a href="hivepress_v1_%257Bconfig_name%257D.html">hivepress/v1/{config_name}</a></li></ul>
+			</nav>
+			<div class="clear"></div>
+		</div>
+
+		<script>prettyPrint();</script>
+		<script src="scripts/linenumber.js"></script>
+	</body>
+</html>
