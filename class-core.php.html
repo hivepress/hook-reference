@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	    <title>Source: class-core.php | HivePress Hook Reference</title>
+
+	    <script src="scripts/prettify/prettify.js"> </script>
+	    <script src="scripts/prettify/lang-css.js"> </script>
+
+		<link rel="shortcut icon" href="favicon.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+		<link type="text/css" rel="stylesheet" href="minireset.min.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="header-logo">
+				<a href="https://hivepress.io/"><img src="logo.svg" alt="HivePress" /></a>
+			</div>
+			<div class="header-menu">
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="https://hivepress.github.io/code-reference/">Code Reference</a></li>
+					<li><a href="https://help.hivepress.io/">Knowledge Base</a></li>
+				</ul>
+			</div>
+		</header>
+		<div class="site-content">
+			<main id="main" class="site-main">
+				
+				<h1 class="page-title">Source: class-core.php</h1>
+				
+				
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ * HivePress core.
+ *
+ * @package HivePress
+ */
+
+namespace HivePress;
+
+use HivePress\Helpers as hp;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * HivePress core class.
+ */
+final class Core {
+
+	/**
+	 * The single class instance.
+	 *
+	 * @var Core
+	 */
+	protected static $instance;
+
+	/**
+	 * HivePress extensions.
+	 *
+	 * @var array
+	 */
+	protected $extensions = [];
+
+	/**
+	 * HivePress configurations.
+	 *
+	 * @var array
+	 */
+	protected $configs = [];
+
+	/**
+	 * HivePress objects.
+	 *
+	 * @var array
+	 */
+	protected $objects = [];
+
+	/**
+	 * HivePress classes.
+	 *
+	 * @var array
+	 */
+	protected $classes = [];
+
+	/**
+	 * Forbid cloning instances.
+	 */
+	protected function __clone() {}
+
+	/**
+	 * Forbids unserializing instances.
+	 *
+	 * @throws \BadMethodCallException Invalid method.
+	 */
+	public function __wakeup() {
+		throw new \BadMethodCallException();
+	}
+
+	/**
+	 * Class constructor.
+	 */
+	protected function __construct() {
+
+		// Autoload classes.
+		spl_autoload_register( [ $this, 'autoload' ] );
+
+		// Activate HivePress.
+		register_activation_hook( HP_FILE, [ __CLASS__, 'activate' ] );
+
+		// Deactivate HivePress.
+		register_deactivation_hook( HP_FILE, [ __CLASS__, 'deactivate' ] );
+
+		// Install HivePress.
+		add_action( 'init', [ $this, 'install' ], 10000 );
+
+		// Setup HivePress.
+		add_action( 'plugins_loaded', [ $this, 'setup' ], -10 );
+	}
+
+	/**
+	 * Returns the single class instance.
+	 *
+	 * @see hivepress()
+	 * @return Core
+	 */
+	public static function instance() {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+
+		return self::$instance;
+	}
+
+	/**
+	 * Autoloads HivePress classes.
+	 *
+	 * @param string $class Class name.
+	 */
+	public function autoload( $class ) {
+		$parts = explode( '\\', str_replace( '_', '-', strtolower( $class ) ) );
+
+		if ( count( $parts ) > 1 &amp;&amp; reset( $parts ) === 'hivepress' ) {
+			$filename = 'class-' . end( $parts ) . '.php';
+
+			array_shift( $parts );
+			array_pop( $parts );
+
+			foreach ( $this->get_paths() as $dir ) {
+				$filepath = rtrim( $dir . '/includes/' . implode( '/', $parts ), '/' ) . '/' . $filename;
+
+				if ( file_exists( $filepath ) ) {
+					require_once $filepath;
+
+					if ( ! ( new \ReflectionClass( $class ) )->isAbstract() &amp;&amp; method_exists( $class, 'init' ) &amp;&amp; ( new \ReflectionMethod( $class, 'init' ) )->isStatic() ) {
+						call_user_func( [ $class, 'init' ] );
+					}
+
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Activates HivePress plugin.
+	 */
+	public static function activate() {
+
+		// Set activation flag.
+		update_option( 'hp_core_activated', '1' );
+	}
+
+	/**
+	 * Deactivates HivePress plugin.
+	 */
+	public static function deactivate() {
+
+		/**
+		 * Fires when HivePress plugin is deactivated.
+		 *
+		 * @hook hivepress/v1/deactivate
+		 */
+		do_action( 'hivepress/v1/deactivate' );
+	}
+
+	/**
+	 * Installs HivePress plugin.
+	 */
+	public function install() {
+		if ( get_option( 'hp_core_activated' ) || count( $this->extensions ) !== absint( get_option( 'hp_extensions_number' ) ) ) {
+
+			/**
+			 * Fires when HivePress plugin is activated.
+			 *
+			 * @hook hivepress/v1/activate
+			 */
+			do_action( 'hivepress/v1/activate' );
+
+			// Unset activation flag.
+			if ( get_option( 'hp_core_activated' ) ) {
+				update_option( 'hp_core_activated', '' );
+			}
+
+			// Update extensions number.
+			if ( count( $this->extensions ) !== absint( get_option( 'hp_extensions_number' ) ) ) {
+				update_option( 'hp_extensions_number', count( $this->extensions ) );
+			}
+
+			// Set installation time.
+			if ( ! get_option( 'hp_installed_time' ) ) {
+				update_option( 'hp_installed_time', time() );
+			}
+		}
+
+		if ( ! get_option( 'hp_core_version' ) || version_compare( get_option( 'hp_core_version' ), $this->get_version(), '&lt;' ) ) {
+
+			if ( get_option( 'hp_core_version' ) ) {
+
+				/**
+				 * Fires when HivePress plugin is updated.
+				 *
+				 * @hook hivepress/v1/update
+				 * @param {string} $version Previous version.
+				 */
+				do_action( 'hivepress/v1/update', get_option( 'hp_core_version' ) );
+			}
+
+			// Update HivePress version.
+			update_option( 'hp_core_version', $this->get_version() );
+		}
+	}
+
+	/**
+	 * Setups HivePress plugin.
+	 */
+	public function setup() {
+
+		// Setup extensions.
+		$this->setup_extensions();
+
+		// Include helpers.
+		require_once $this->get_path() . '/includes/helpers.php';
+
+		// Load textdomains.
+		$this->load_textdomains();
+
+		// Load packages.
+		$this->load_packages();
+
+		// Initialize components.
+		$this->get_components();
+
+		/**
+		 * Fires when HivePress plugin is set up.
+		 *
+		 * @hook hivepress/v1/setup
+		 */
+		do_action( 'hivepress/v1/setup' );
+	}
+
+	/**
+	 * Setups HivePress extensions.
+	 */
+	protected function setup_extensions() {
+
+		/**
+		 * Filters the directory paths of HivePress extensions. You can register a new extension by adding its directory path to the filtered array.
+		 *
+		 * @hook hivepress/v1/extensions
+		 * @param {array} $paths Directory paths.
+		 * @return {array} Directory paths.
+		 */
+		$extensions = apply_filters( 'hivepress/v1/extensions', [ dirname( HP_FILE ) ] );
+
+		// Add updater if available.
+		if ( ! isset( $extensions['updates'] ) ) {
+			$path = '/vendor/hivepress/hivepress-updates';
+
+			foreach ( $extensions as $dir ) {
+				if ( file_exists( $dir . $path . '/hivepress-updates.php' ) ) {
+					$extensions['updates'] = $dir . $path;
+
+					break;
+				}
+			}
+		}
+
+		// Add extension details.
+		foreach ( $extensions as $name => $dir ) {
+			if ( is_array( $dir ) ) {
+
+				// Add extension.
+				$this->extensions[ $name ] = $dir;
+			} else {
+
+				// Get file path.
+				$dirname  = basename( $dir );
+				$filepath = $dir . '/' . $dirname . '.php';
+
+				// Get extension name.
+				$name = str_replace( '-', '_', preg_replace( '/^hivepress-/', '', $dirname ) );
+
+				if ( 'hivepress' === $dirname ) {
+					$name = 'core';
+				}
+
+				if ( file_exists( $filepath ) ) {
+
+					// Get file data.
+					$filedata = get_file_data(
+						$filepath,
+						[
+							'name'    => 'Plugin Name',
+							'version' => 'Version',
+						]
+					);
+
+					// Add extension.
+					$this->extensions[ $name ] = [
+						'name'    => $filedata['name'],
+						'version' => $filedata['version'],
+						'path'    => $dir,
+						'url'     => rtrim( plugin_dir_url( $filepath ), '/' ),
+					];
+				}
+			}
+		}
+	}
+
+	/**
+	 * Loads text domains.
+	 */
+	protected function load_textdomains() {
+		foreach ( $this->get_paths() as $dir ) {
+			$dirname    = basename( $dir );
+			$textdomain = hp\sanitize_slug( $dirname );
+
+			load_plugin_textdomain( $textdomain, false, $dirname . '/languages' );
+		}
+	}
+
+	/**
+	 * Loads Composer packages.
+	 */
+	protected function load_packages() {
+		foreach ( $this->get_paths() as $dir ) {
+			$filepath = $dir . '/vendor/autoload.php';
+
+			if ( file_exists( $filepath ) ) {
+				require_once $filepath;
+			}
+		}
+	}
+
+	/**
+	 * Catches calls to undefined methods.
+	 *
+	 * @param string $name Method name.
+	 * @param array  $args Method arguments.
+	 * @throws \BadMethodCallException Invalid method.
+	 * @return mixed
+	 */
+	public function __call( $name, $args ) {
+		if ( strpos( $name, 'get_' ) === 0 ) {
+
+			// Get property name.
+			$property = substr( $name, strlen( 'get_' ) );
+
+			if ( in_array( $property, [ 'name', 'version', 'path', 'url' ], true ) ) {
+
+				// Get extension name.
+				$extension = 'core';
+
+				if ( $args ) {
+					$extension = hp\get_first_array_value( $args );
+				}
+
+				// Get property value.
+				$value = null;
+
+				if ( isset( $this->extensions[ $extension ][ $property ] ) ) {
+					$value = $this->extensions[ $extension ][ $property ];
+				}
+
+				return $value;
+			} else {
+
+				// Set object type.
+				$object_type = $property;
+
+				if ( ! isset( $this->objects[ $object_type ] ) ) {
+					$this->objects[ $object_type ] = [];
+
+					foreach ( $this->get_paths() as $dir ) {
+						foreach ( glob( $dir . '/includes/' . $object_type . '/*.php' ) as $filepath ) {
+
+							// Get object name.
+							$object_name = str_replace( '-', '_', preg_replace( '/^class-/', '', basename( $filepath, '.php' ) ) );
+
+							// Create object.
+							$object = hp\create_class_instance( '\HivePress\\' . $object_type . '\\' . $object_name );
+
+							if ( $object ) {
+								$this->objects[ $object_type ][ $object_name ] = $object;
+							}
+						}
+					}
+				}
+
+				return $this->objects[ $object_type ];
+			}
+		}
+
+		throw new \BadMethodCallException();
+	}
+
+	/**
+	 * Catches getting undefined properties.
+	 *
+	 * @param string $name Property name.
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		return hp\get_array_value( $this->get_components(), $name );
+	}
+
+	/**
+	 * Gets HivePress filepaths.
+	 *
+	 * @return array
+	 */
+	public function get_paths() {
+		return array_column( $this->extensions, 'path' );
+	}
+
+	/**
+	 * Gets HivePress configuration.
+	 *
+	 * @param string $name Configuration name.
+	 * @return array
+	 */
+	public function get_config( $name ) {
+		if ( ! isset( $this->configs[ $name ] ) ) {
+			$this->configs[ $name ] = [];
+
+			foreach ( $this->get_paths() as $dir ) {
+				$filepath = $dir . '/includes/configs/' . hp\sanitize_slug( $name ) . '.php';
+
+				if ( file_exists( $filepath ) ) {
+					$this->configs[ $name ] = hp\merge_arrays( $this->configs[ $name ], include $filepath );
+				}
+			}
+
+			/**
+			 * Filters HivePress configuration. The dynamic part of the hook refers to the configuration name (e.g. `post_types`, `taxonomies`, `meta_boxes`). You can check the available configurations in the `includes/configs` directory of HivePress.
+			 *
+			 * @hook hivepress/v1/{config_name}
+			 * @param {array} $config Configuration array.
+			 * @return {array} Configuration array.
+			 */
+			$this->configs[ $name ] = apply_filters( 'hivepress/v1/' . $name, $this->configs[ $name ] );
+		}
+
+		return $this->configs[ $name ];
+	}
+
+	/**
+	 * Gets HivePress classes.
+	 *
+	 * @param string $namespace Class namespace.
+	 * @return array
+	 */
+	public function get_classes( $namespace ) {
+		if ( ! isset( $this->classes[ $namespace ] ) ) {
+			$this->classes[ $namespace ] = [];
+
+			foreach ( $this->get_paths() as $dir ) {
+				foreach ( glob( $dir . '/includes/' . $namespace . '/*.php' ) as $filepath ) {
+
+					// Get name.
+					$name = str_replace( '-', '_', preg_replace( '/^class-/', '', basename( $filepath, '.php' ) ) );
+
+					// Get class.
+					$class = '\HivePress\\' . $namespace . '\\' . $name;
+
+					if ( class_exists( $class ) &amp;&amp; ! ( new \ReflectionClass( $class ) )->isAbstract() ) {
+						$this->classes[ $namespace ][ $name ] = $class;
+					}
+				}
+			}
+		}
+
+		return $this->classes[ $namespace ];
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+			</main>
+			<nav class="site-sidebar">
+				<h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="hivepress_v1_activate.html">hivepress/v1/activate</a></li><li><a href="hivepress_v1_deactivate.html">hivepress/v1/deactivate</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_send.html">hivepress/v1/emails/{email_name}/send</a></li><li><a href="hivepress_v1_models_comment_%257Baction_type%257D.html">hivepress/v1/models/comment/{action_type}</a></li><li><a href="hivepress_v1_models_post_update_terms.html">hivepress/v1/models/post/update_terms</a></li><li><a href="hivepress_v1_models_post_%257Baction_type%257D.html">hivepress/v1/models/post/{action_type}</a></li><li><a href="hivepress_v1_models_term_%257Baction_type%257D.html">hivepress/v1/models/term/{action_type}</a></li><li><a href="hivepress_v1_models_user_login.html">hivepress/v1/models/user/login</a></li><li><a href="hivepress_v1_models_user_register.html">hivepress/v1/models/user/register</a></li><li><a href="hivepress_v1_models_user_update_%257Bfield_name%257D.html">hivepress/v1/models/user/update_{field_name}</a></li><li><a href="hivepress_v1_models_user_%257Baction_type%257D.html">hivepress/v1/models/user/{action_type}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_relate.html">hivepress/v1/models/{model_name}/relate</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_search.html">hivepress/v1/models/{model_name}/search</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_status.html">hivepress/v1/models/{model_name}/update_status</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_%257Bfield_name%257D.html">hivepress/v1/models/{model_name}/update_{field_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_%257Baction_type%257D.html">hivepress/v1/models/{model_name}/{action_type}</a></li><li><a href="hivepress_v1_setup.html">hivepress/v1/setup</a></li><li><a href="hivepress_v1_update.html">hivepress/v1/update</a></li><li><a href="hivepress_v2_models_user_%257Baction_type%257D.html">hivepress/v2/models/user/{action_type}</a></li></ul><h3>Filters</h3><ul><li><a href="hivepress_v1_admin_notices.html">hivepress/v1/admin_notices</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D.html">hivepress/v1/blocks/{block_type}</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D_meta.html">hivepress/v1/blocks/{block_type}/meta</a></li><li><a href="hivepress_v1_components_attribute_models.html">hivepress/v1/components/attribute/models</a></li><li><a href="hivepress_v1_components_editor_preview.html">hivepress/v1/components/editor/preview</a></li><li><a href="hivepress_v1_components_request_context.html">hivepress/v1/components/request/context</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D.html">hivepress/v1/emails/{email_name}</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_meta.html">hivepress/v1/emails/{email_name}/meta</a></li><li><a href="hivepress_v1_extensions.html">hivepress/v1/extensions</a></li><li><a href="hivepress_v1_fields_field_options.html">hivepress/v1/fields/field/options</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D.html">hivepress/v1/fields/{field_type}</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_display_value.html">hivepress/v1/fields/{field_type}/display_value</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_meta.html">hivepress/v1/fields/{field_type}/meta</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D.html">hivepress/v1/forms/{form_name}</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_errors.html">hivepress/v1/forms/{form_name}/errors</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_meta.html">hivepress/v1/forms/{form_name}/meta</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D.html">hivepress/v1/menus/{menu_name}</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_items.html">hivepress/v1/menus/{menu_name}/items</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_meta.html">hivepress/v1/menus/{menu_name}/meta</a></li><li><a href="hivepress_v1_meta_boxes_%257Bmeta_box_name%257D.html">hivepress/v1/meta_boxes/{meta_box_name}</a></li><li><a href="hivepress_v1_models_attachment_filename.html">hivepress/v1/models/attachment/filename</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D.html">hivepress/v1/models/{model_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_attributes.html">hivepress/v1/models/{model_name}/attributes</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_errors.html">hivepress/v1/models/{model_name}/errors</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_fields.html">hivepress/v1/models/{model_name}/fields</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_meta.html">hivepress/v1/models/{model_name}/meta</a></li><li><a href="hivepress_v1_routes.html">hivepress/v1/routes</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D.html">hivepress/v1/templates/{template_name}</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_blocks.html">hivepress/v1/templates/{template_name}/blocks</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_meta.html">hivepress/v1/templates/{template_name}/meta</a></li><li><a href="hivepress_v1_%257Bconfig_name%257D.html">hivepress/v1/{config_name}</a></li></ul>
+			</nav>
+			<div class="clear"></div>
+		</div>
+
+		<script>prettyPrint();</script>
+		<script src="scripts/linenumber.js"></script>
+	</body>
+</html>

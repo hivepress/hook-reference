@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	    <title>Source: fields/class-select.php | HivePress Hook Reference</title>
+
+	    <script src="scripts/prettify/prettify.js"> </script>
+	    <script src="scripts/prettify/lang-css.js"> </script>
+
+		<link rel="shortcut icon" href="favicon.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+	    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+
+	    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+	    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+		<link type="text/css" rel="stylesheet" href="minireset.min.css">
+		<link type="text/css" rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="header-logo">
+				<a href="https://hivepress.io/"><img src="logo.svg" alt="HivePress" /></a>
+			</div>
+			<div class="header-menu">
+				<ul>
+					<li><a href="index.html">Home</a></li>
+					<li><a href="https://hivepress.github.io/code-reference/">Code Reference</a></li>
+					<li><a href="https://help.hivepress.io/">Knowledge Base</a></li>
+				</ul>
+			</div>
+		</header>
+		<div class="site-content">
+			<main id="main" class="site-main">
+				
+				<h1 class="page-title">Source: fields/class-select.php</h1>
+				
+				
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ * Select field.
+ *
+ * @package HivePress\Fields
+ */
+
+namespace HivePress\Fields;
+
+use HivePress\Helpers as hp;
+
+// Exit if accessed directly.
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Drop-down list.
+ */
+class Select extends Field {
+
+	/**
+	 * Field placeholder.
+	 *
+	 * @var string
+	 */
+	protected $placeholder;
+
+	/**
+	 * Selectable options.
+	 *
+	 * @var array
+	 */
+	protected $options = [];
+
+	/**
+	 * Disable parent options?
+	 *
+	 * @var bool
+	 */
+	protected $parent_disabled = false;
+
+	/**
+	 * Allow selecting multiple options?
+	 *
+	 * @var bool
+	 */
+	protected $multiple = false;
+
+	/**
+	 * Maximum number of selected options.
+	 *
+	 * @var int
+	 */
+	protected $max_values;
+
+	/**
+	 * SQL query operator.
+	 *
+	 * @var mixed
+	 */
+	protected $filter_operator;
+
+	/**
+	 * Options source URL.
+	 *
+	 * @var string
+	 */
+	protected $source;
+
+	/**
+	 * Class initializer.
+	 *
+	 * @param array $meta Class meta values.
+	 */
+	public static function init( $meta = [] ) {
+		$meta = hp\merge_arrays(
+			[
+				'label'      => esc_html_x( 'Select', 'field', 'hivepress' ),
+				'filterable' => true,
+
+				'settings'   => [
+					'placeholder'     => [
+						'label'      => esc_html__( 'Placeholder', 'hivepress' ),
+						'type'       => 'text',
+						'max_length' => 256,
+						'_order'     => 100,
+					],
+
+					'multiple'        => [
+						'label'   => esc_html_x( 'Multiple', 'selection', 'hivepress' ),
+						'caption' => esc_html__( 'Allow multiple selection', 'hivepress' ),
+						'type'    => 'checkbox',
+						'_order'  => 105,
+					],
+
+					// @todo remove prefix from parent.
+					'max_values'      => [
+						'label'     => esc_html__( 'Maximum Selection', 'hivepress' ),
+						'type'      => 'number',
+						'min_value' => 1,
+						'_context'  => 'edit',
+						'_parent'   => 'edit_field_multiple',
+						'_order'    => 110,
+					],
+
+					'options'         => [
+						'label'    => esc_html__( 'Options', 'hivepress' ),
+						'type'     => 'select',
+						'options'  => [],
+						'multiple' => true,
+						'_context' => 'edit',
+						'_order'   => 120,
+					],
+
+					// @todo remove prefix from parent.
+					'filter_operator' => [
+						'label'    => esc_html__( 'Options', 'hivepress' ),
+						'caption'  => esc_html__( 'Search any of the selected options', 'hivepress' ),
+						'type'     => 'checkbox',
+						'_context' => 'search',
+						'_parent'  => 'search_field_multiple',
+						'_order'   => 130,
+					],
+				],
+			],
+			$meta
+		);
+
+		parent::init( $meta );
+	}
+
+	/**
+	 * Bootstraps field properties.
+	 */
+	protected function boot() {
+		$attributes = [];
+
+		// Normalize options.
+		if ( ! is_array( $this->options ) ) {
+			$this->options = [];
+		}
+
+		// Set placeholder.
+		if ( ! $this->multiple ) {
+			if ( is_null( $this->placeholder ) ) {
+				$this->placeholder = '&amp;mdash;';
+			}
+
+			if ( ! isset( $this->options[''] ) ) {
+				$this->options = [ '' => $this->placeholder ] + $this->options;
+			}
+		} elseif ( ! is_null( $this->placeholder ) ) {
+			$attributes['data-placeholder'] = $this->placeholder;
+		}
+
+		// Set disabled flags.
+		if ( $this->disabled ) {
+			$attributes['disabled'] = true;
+		}
+
+		if ( $this->parent_disabled ) {
+			foreach ( $this->options as $value => $parent ) {
+				foreach ( $this->options as $child ) {
+					if ( hp\get_array_value( $child, 'parent' ) === $value ) {
+						if ( is_array( $parent ) ) {
+							$this->options[ $value ]['disabled'] = true;
+						}
+
+						break;
+					}
+				}
+			}
+		}
+
+		// Set required flag.
+		if ( $this->required ) {
+			$attributes['required'] = true;
+		}
+
+		// Set source.
+		if ( $this->source ) {
+			$attributes['data-source'] = esc_url( $this->source );
+		}
+
+		// Set component.
+		if ( 'hidden' !== $this->display_type ) {
+			$attributes['data-component'] = 'select';
+		}
+
+		$this->attributes = hp\merge_arrays( $this->attributes, $attributes );
+
+		parent::boot();
+	}
+
+	/**
+	 * Sets field value.
+	 *
+	 * @param mixed $value Field value.
+	 * @return object
+	 */
+	final public function set_value( $value ) {
+		parent::set_value( $value );
+
+		if ( ! is_null( $this->value ) &amp;&amp; $this->source ) {
+
+			/**
+			 * Filters the selectable field options. At the time of this hook the field value is already available.
+			 *
+			 * @hook hivepress/v1/fields/field/options
+			 * @param {array} $options Selectable options.
+			 * @param {object} $field Field object.
+			 * @return {array} Selectable options.
+			 */
+			$this->options = apply_filters( 'hivepress/v1/fields/field/options', $this->options, $this );
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Gets field value for display.
+	 *
+	 * @return mixed
+	 */
+	public function get_display_value() {
+		if ( ! is_null( $this->value ) ) {
+			$labels = [];
+
+			foreach ( (array) $this->value as $value ) {
+				$label = hp\get_array_value( $this->options, $value, '' );
+
+				if ( is_array( $label ) ) {
+					$label = hp\get_array_value( $label, 'label', '' );
+				}
+
+				if ( strlen( $label ) ) {
+					$labels[] = $label;
+				}
+			}
+
+			if ( $labels ) {
+				return implode( ', ', $labels );
+			}
+		}
+	}
+
+	/**
+	 * Adds SQL filter.
+	 */
+	protected function add_filter() {
+		parent::add_filter();
+
+		if ( $this->multiple ) {
+			if ( $this->filter_operator ) {
+				$this->filter['operator'] = 'IN';
+			} else {
+				$this->filter['operator'] = 'AND';
+			}
+		} else {
+			$this->filter['operator'] = 'IN';
+		}
+	}
+
+	/**
+	 * Normalizes field value.
+	 */
+	protected function normalize() {
+		parent::normalize();
+
+		if ( $this->multiple &amp;&amp; ! is_null( $this->value ) ) {
+			if ( [] !== $this->value ) {
+				$this->value = (array) $this->value;
+			} else {
+				$this->value = null;
+			}
+		} elseif ( ! $this->multiple &amp;&amp; is_array( $this->value ) ) {
+			if ( $this->value ) {
+				$this->value = hp\get_first_array_value( $this->value );
+			} else {
+				$this->value = null;
+			}
+		}
+	}
+
+	/**
+	 * Sanitizes field value.
+	 */
+	protected function sanitize() {
+		if ( $this->multiple ) {
+			$this->value = array_map(
+				function( $value ) {
+					return is_numeric( $value ) ? absint( $value ) : sanitize_text_field( $value );
+				},
+				$this->value
+			);
+		} else {
+			$this->value = is_numeric( $this->value ) ? absint( $this->value ) : sanitize_text_field( $this->value );
+		}
+	}
+
+	/**
+	 * Validates field value.
+	 *
+	 * @return bool
+	 */
+	public function validate() {
+		if ( parent::validate() &amp;&amp; ! is_null( $this->value ) ) {
+			$options = array_intersect_key( $this->options, array_flip( (array) $this->value ) );
+
+			if ( count( $options ) !== count( (array) $this->value ) || array_filter(
+				array_map(
+					function( $option ) {
+						return hp\get_array_value( $option, 'disabled' );
+					},
+					$options
+				)
+			) ) {
+				$this->add_errors( sprintf( hivepress()->translator->get_string( 'field_contains_invalid_value' ), $this->get_label( true ) ) );
+			}
+
+			if ( $this->multiple &amp;&amp; $this->max_values &amp;&amp; count( $options ) > $this->max_values ) {
+				$this->add_errors( sprintf( hivepress()->translator->get_string( 'field_contains_too_many_values' ), $this->get_label( true ) ) );
+			}
+		}
+
+		if ( isset( $this->errors['required'] ) &amp;&amp; ! $this->options ) {
+			unset( $this->errors['required'] );
+		}
+
+		return empty( $this->errors );
+	}
+
+	/**
+	 * Displays field HTML.
+	 *
+	 * @return string
+	 */
+	public function display() {
+		if ( ! $this->multiple &amp;&amp; ! is_null( $this->value ) ) {
+			$this->context['parent_value'] = null;
+
+			$value = hp\get_array_value( $this->options, $this->value );
+
+			if ( is_array( $value ) &amp;&amp; isset( $value['parent'] ) ) {
+				$this->context['parent_value'] = hp\get_array_value( hp\get_array_value( $this->options, $value['parent'] ), 'label' );
+			}
+		}
+
+		return parent::display();
+	}
+
+	/**
+	 * Renders field HTML.
+	 *
+	 * @return string
+	 */
+	public function render() {
+		$output = '&lt;select name="' . esc_attr( $this->name ) . ( $this->multiple ? '[]" multiple' : '"' ) . ' ' . hp\html_attributes( $this->attributes ) . '>';
+
+		// Render options.
+		$output .= $this->render_options();
+
+		$output .= '&lt;/select>';
+
+		return $output;
+	}
+
+	/**
+	 * Renders selectable options.
+	 *
+	 * @param mixed $current Current value.
+	 * @param int   $level Nesting level.
+	 * @return string
+	 */
+	protected function render_options( $current = null, $level = 0 ) {
+		$output = '';
+
+		// Filter options.
+		$options = array_filter(
+			$this->options,
+			function( $option ) use ( $current ) {
+				$parent = hp\get_array_value( $option, 'parent' );
+
+				return ( is_null( $current ) &amp;&amp; is_null( $parent ) ) || ( ! is_null( $current ) &amp;&amp; $parent === $current );
+			}
+		);
+
+		// Render options.
+		foreach ( $options as $value => $label ) {
+
+			// Get attributes.
+			$attributes = [
+				'value' => $value,
+			];
+
+			if ( $level ) {
+				$attributes['data-level'] = $level;
+
+				$attributes['data-parent'] = hp\get_array_value( $label, 'parent' );
+			}
+
+			if ( hp\get_array_value( $label, 'disabled' ) ) {
+				$attributes['disabled'] = true;
+			} elseif ( in_array( $value, (array) $this->value, true ) ) {
+				$attributes['selected'] = true;
+			}
+
+			// Get label.
+			if ( is_array( $label ) ) {
+				$label = hp\get_array_value( $label, 'label', $value );
+			}
+
+			// Render option.
+			$output .= '&lt;option ' . hp\html_attributes( $attributes ) . '>' . esc_html( $label ) . '&lt;/option>';
+
+			// Render child options.
+			$output .= $this->render_options( $value, $level + 1 );
+		}
+
+		return $output;
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+			</main>
+			<nav class="site-sidebar">
+				<h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="hivepress_v1_activate.html">hivepress/v1/activate</a></li><li><a href="hivepress_v1_deactivate.html">hivepress/v1/deactivate</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_send.html">hivepress/v1/emails/{email_name}/send</a></li><li><a href="hivepress_v1_models_comment_%257Baction_type%257D.html">hivepress/v1/models/comment/{action_type}</a></li><li><a href="hivepress_v1_models_post_update_terms.html">hivepress/v1/models/post/update_terms</a></li><li><a href="hivepress_v1_models_post_%257Baction_type%257D.html">hivepress/v1/models/post/{action_type}</a></li><li><a href="hivepress_v1_models_term_%257Baction_type%257D.html">hivepress/v1/models/term/{action_type}</a></li><li><a href="hivepress_v1_models_user_login.html">hivepress/v1/models/user/login</a></li><li><a href="hivepress_v1_models_user_register.html">hivepress/v1/models/user/register</a></li><li><a href="hivepress_v1_models_user_update_%257Bfield_name%257D.html">hivepress/v1/models/user/update_{field_name}</a></li><li><a href="hivepress_v1_models_user_%257Baction_type%257D.html">hivepress/v1/models/user/{action_type}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_relate.html">hivepress/v1/models/{model_name}/relate</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_search.html">hivepress/v1/models/{model_name}/search</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_status.html">hivepress/v1/models/{model_name}/update_status</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_update_%257Bfield_name%257D.html">hivepress/v1/models/{model_name}/update_{field_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_%257Baction_type%257D.html">hivepress/v1/models/{model_name}/{action_type}</a></li><li><a href="hivepress_v1_setup.html">hivepress/v1/setup</a></li><li><a href="hivepress_v1_update.html">hivepress/v1/update</a></li><li><a href="hivepress_v2_models_user_%257Baction_type%257D.html">hivepress/v2/models/user/{action_type}</a></li></ul><h3>Filters</h3><ul><li><a href="hivepress_v1_admin_notices.html">hivepress/v1/admin_notices</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D.html">hivepress/v1/blocks/{block_type}</a></li><li><a href="hivepress_v1_blocks_%257Bblock_type%257D_meta.html">hivepress/v1/blocks/{block_type}/meta</a></li><li><a href="hivepress_v1_components_attribute_models.html">hivepress/v1/components/attribute/models</a></li><li><a href="hivepress_v1_components_editor_preview.html">hivepress/v1/components/editor/preview</a></li><li><a href="hivepress_v1_components_request_context.html">hivepress/v1/components/request/context</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D.html">hivepress/v1/emails/{email_name}</a></li><li><a href="hivepress_v1_emails_%257Bemail_name%257D_meta.html">hivepress/v1/emails/{email_name}/meta</a></li><li><a href="hivepress_v1_extensions.html">hivepress/v1/extensions</a></li><li><a href="hivepress_v1_fields_field_options.html">hivepress/v1/fields/field/options</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D.html">hivepress/v1/fields/{field_type}</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_display_value.html">hivepress/v1/fields/{field_type}/display_value</a></li><li><a href="hivepress_v1_fields_%257Bfield_type%257D_meta.html">hivepress/v1/fields/{field_type}/meta</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D.html">hivepress/v1/forms/{form_name}</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_errors.html">hivepress/v1/forms/{form_name}/errors</a></li><li><a href="hivepress_v1_forms_%257Bform_name%257D_meta.html">hivepress/v1/forms/{form_name}/meta</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D.html">hivepress/v1/menus/{menu_name}</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_items.html">hivepress/v1/menus/{menu_name}/items</a></li><li><a href="hivepress_v1_menus_%257Bmenu_name%257D_meta.html">hivepress/v1/menus/{menu_name}/meta</a></li><li><a href="hivepress_v1_meta_boxes_%257Bmeta_box_name%257D.html">hivepress/v1/meta_boxes/{meta_box_name}</a></li><li><a href="hivepress_v1_models_attachment_filename.html">hivepress/v1/models/attachment/filename</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D.html">hivepress/v1/models/{model_name}</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_attributes.html">hivepress/v1/models/{model_name}/attributes</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_errors.html">hivepress/v1/models/{model_name}/errors</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_fields.html">hivepress/v1/models/{model_name}/fields</a></li><li><a href="hivepress_v1_models_%257Bmodel_name%257D_meta.html">hivepress/v1/models/{model_name}/meta</a></li><li><a href="hivepress_v1_routes.html">hivepress/v1/routes</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D.html">hivepress/v1/templates/{template_name}</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_blocks.html">hivepress/v1/templates/{template_name}/blocks</a></li><li><a href="hivepress_v1_templates_%257Btemplate_name%257D_meta.html">hivepress/v1/templates/{template_name}/meta</a></li><li><a href="hivepress_v1_%257Bconfig_name%257D.html">hivepress/v1/{config_name}</a></li></ul>
+			</nav>
+			<div class="clear"></div>
+		</div>
+
+		<script>prettyPrint();</script>
+		<script src="scripts/linenumber.js"></script>
+	</body>
+</html>
